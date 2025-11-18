@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mark Attendance</title>
+
+  <style>
+    body {
+      font-family: Poppins, sans-serif;
+      background: #eef3ff;
+      padding: 25px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .box {
+      max-width: 450px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    label { font-weight: 600; }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0 15px;
+      border-radius: 8px;
+      border: 1px solid #bbb;
+    }
+
+    .radio-box {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #1976d2;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #0d47a1;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2 id="subjectTitle">Attendance</h2>
+
+  <div class="box">
+    <label>Student Name</label>
+    <input type="text" id="studentName" placeholder="Enter student name">
+
+    <label>Roll Number</label>
+    <input type="number" id="roll" placeholder="Enter roll no">
+
+    <label>Attendance</label>
+    <div class="radio-box">
+      <label><input type="radio" name="status" value="Present"> Present</label>
+      <label><input type="radio" name="status" value="Absent"> Absent</label>
+    </div>
+
+    <button onclick="saveAttendance()">Submit</button>
+  </div>
+
+
+  <script>
+    // Read subject from URL
+    const params = new URLSearchParams(window.location.search);
+    const subject = params.get("sub");
+
+    if (subject) {
+      document.getElementById("subjectTitle").innerText =
+        subject + " - Attendance";
+    }
+
+    // Save attendance into localStorage
+    function saveAttendance() {
+      const name = document.getElementById("studentName").value.trim();
+      const roll = document.getElementById("roll").value.trim();
+      const statusOption = document.querySelector("input[name='status']:checked");
+
+      if (!name || !roll || !statusOption) {
+        alert("Please fill all fields.");
+        return;
+      }
+
+      const status = statusOption.value;
+      const today = new Date().toLocaleDateString();
+
+      const record = {
+        name: name,
+        roll: roll,
+        status: status,
+        date: today
+      };
+
+      const key = "attendance_" + subject;
+      const oldData = JSON.parse(localStorage.getItem(key)) || [];
+      oldData.push(record);
+
+      localStorage.setItem(key, JSON.stringify(oldData));
+
+      alert("Attendance saved!");
+      document.getElementById("studentName").value = "";
+      document.getElementById("roll").value = "";
+      statusOption.checked = false;
+    }
+  </script>
+
+</body>
+</html>

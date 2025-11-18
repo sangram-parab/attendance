@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RJ College Attendance</title>
+  <style>
+    body {
+      font-family: Poppins, sans-serif;
+      background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      animation: fadeIn 1s ease-in-out;
+      text-align: center;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      width: 90%;
+      max-width: 600px;
+      animation: slideUp 1.2s ease-in-out;
+    }
+
+    button {
+      padding: 15px;
+      background: #1e88e5;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #1565c0;
+      transform: scale(1.05);
+    }
+
+    .report-btn {
+      margin-top: 25px;
+      background: #43a047;
+    }
+
+    .report-btn:hover {
+      background: #2e7d32;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>RJ College of Commerce and Science<br>Ghatkopar (W)</h1>
+
+  <div class="container">
+    <button onclick="location.href='attendance.html?sub=Computer Network'">Computer Network</button>
+    <button onclick="location.href='attendance.html?sub=Principle of Software Engineer'">Principle of Software Engineer</button>
+    <button onclick="location.href='attendance.html?sub=Data Structure Algorithm'">Data Structure Algorithm</button>
+    <button onclick="location.href='attendance.html?sub=Statics Mathematics'">Statics Mathematics</button>
+    <button onclick="location.href='attendance.html?sub=Personal Finance'">Personal Finance</button>
+    <button onclick="location.href='attendance.html?sub=Computer Graphics'">Computer Graphics</button>
+  </div>
+
+  <button class="report-btn" onclick="location.href='report.html'">View Full Attendance Report</button>
+
+</body>
+</html>
