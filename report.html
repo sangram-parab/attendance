@@ -11,11 +11,7 @@
       background: #eef3ff;
       padding: 25px;
     }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+    h1 { text-align: center; margin-bottom: 20px; }
 
     select, input {
       width: 100%;
@@ -82,7 +78,7 @@
   </select>
 
   <label>Enter Roll Number</label>
-  <input type="number" id="rollInput" placeholder="Enter roll number">
+  <input type="text" id="rollInput" placeholder="Enter roll number">
 
   <button onclick="loadStudentRecord()">Show Student Record</button>
 
@@ -118,11 +114,24 @@
         return;
       }
 
-      const key = "attendance_" + subject;
-      const data = JSON.parse(localStorage.getItem(key)) || [];
+      let allRecords = [];
 
-      // Filter records for this student
-      const studentRecords = data.filter(r => r.roll == roll);
+      // read all keys that attendance.html saved
+      for (let i = 0; i < localStorage.length; i++) {
+        let key = localStorage.key(i);
+
+        if (key.startsWith("attendance::")) {
+          let data = JSON.parse(localStorage.getItem(key)) || [];
+
+          // Merge all data
+          allRecords = allRecords.concat(data);
+        }
+      }
+
+      // filter by subject and roll
+      const studentRecords = allRecords.filter(r =>
+        r.subject === subject && r.roll == roll
+      );
 
       if (studentRecords.length === 0) {
         noData.style.display = "block";
