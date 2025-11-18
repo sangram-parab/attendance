@@ -1,87 +1,280 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RJ College Attendance</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RJ College Attendance — Subjects</title>
   <style>
-    body {
-      font-family: Poppins, sans-serif;
-      background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
+    :root{
+      --bg1:#eaf4ff;
+      --bg2:#d9ecff;
+      --accent:#1e88e5;
+      --glass: rgba(255,255,255,0.6);
+      --glass-border: rgba(255,255,255,0.45);
+      --card-radius:14px;
+      --shadow: 0 6px 18px rgba(30,30,30,0.08);
+      font-family: Inter, Poppins, system-ui, sans-serif;
+    }
+    html,body{height:100%;margin:0}
+    body{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: linear-gradient(135deg,var(--bg1),var(--bg2));
+      padding:28px;
     }
 
-    h1 {
-      font-size: 28px;
-      margin-bottom: 20px;
-      animation: fadeIn 1s ease-in-out;
-      text-align: center;
+    .wrap{
+      width:980px;
+      max-width:95%;
+      border-radius:18px;
+      padding:28px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0.45));
+      box-shadow:var(--shadow);
+      backdrop-filter: blur(8px) saturate(120%);
+      border: 1px solid var(--glass-border);
     }
 
-    .container {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-      width: 90%;
-      max-width: 600px;
-      animation: slideUp 1.2s ease-in-out;
+    h1{
+      margin:0 0 18px 0;
+      font-size:22px;
+      color:#063a6b;
+      text-align:center;
+      letter-spacing:0.2px;
     }
 
-    button {
-      padding: 15px;
-      background: #1e88e5;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: 0.3s;
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px;
+      margin-bottom:18px;
     }
 
-    button:hover {
-      background: #1565c0;
-      transform: scale(1.05);
+    .sub-btn{
+      padding:14px;
+      border-radius:12px;
+      background: white;
+      border:1px solid rgba(10,40,80,0.06);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      font-weight:600;
+      box-shadow: 0 4px 10px rgba(16,48,96,0.04);
+      transition: transform .14s ease, box-shadow .14s ease;
+    }
+    .sub-btn:hover{ transform: translateY(-4px); box-shadow: 0 10px 30px rgba(16,48,96,0.08); }
+
+    .report{
+      display:flex;
+      justify-content:center;
+      margin-top:6px;
+    }
+    .report a{
+      text-decoration:none;
+      color:white;
+      background:var(--accent);
+      padding:12px 18px;
+      border-radius:10px;
+      font-weight:700;
     }
 
-    .report-btn {
-      margin-top: 25px;
-      background: #43a047;
+    /* Modal (glass popup) */
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background: rgba(8,18,40,0.35);
+      z-index:60;
+    }
+    .modal{
+      width:420px;
+      max-width:94%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.82));
+      border-radius:16px;
+      padding:20px;
+      box-shadow: 0 20px 60px rgba(6,30,64,0.25);
+      border:1px solid rgba(255,255,255,0.6);
+      backdrop-filter: blur(8px);
+      animation: pop .22s ease;
+    }
+    @keyframes pop{ from{ transform: translateY(14px) scale(.98); opacity:0 } to{ transform: translateY(0) scale(1); opacity:1 } }
+
+    .modal h2{ margin:0 0 10px 0; font-size:16px; color:#063a6b; }
+    .modal p{ margin:0 0 14px 0; color:#234a6f; font-size:13px; opacity:0.95; }
+
+    .field{ display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
+    input[type="text"], input[type="password"]{
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid rgba(20,40,80,0.08);
+      font-size:14px;
+      outline:none;
     }
 
-    .report-btn:hover {
-      background: #2e7d32;
+    .modal-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:6px; }
+    .btn{
+      padding:10px 14px;
+      border-radius:10px;
+      border:none;
+      cursor:pointer;
+      font-weight:700;
     }
+    .btn-cancel{ background:transparent; color:#234a6f; border:1px solid rgba(35,74,111,0.08); }
+    .btn-submit{ background:var(--accent); color:white; }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
+    .error{ color:#9b1c1c; font-size:13px; margin-top:6px; display:none; }
 
-    @keyframes slideUp {
-      from { transform: translateY(40px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+    /* small screens */
+    @media (max-width:640px){
+      .grid{ grid-template-columns:repeat(2,1fr); }
     }
   </style>
 </head>
 <body>
 
-  <h1>RJ College of Commerce and Science<br>Ghatkopar (W)</h1>
+  <div class="wrap">
+    <h1>RJ College of Commerce and Science — Select Subject</h1>
 
-  <div class="container">
-    <button onclick="location.href='attendance.html?sub=Computer Network'">Computer Network</button>
-    <button onclick="location.href='attendance.html?sub=Principle of Software Engineer'">Principle of Software Engineer</button>
-    <button onclick="location.href='attendance.html?sub=Data Structure Algorithm'">Data Structure Algorithm</button>
-    <button onclick="location.href='attendance.html?sub=Statics Mathematics'">Statics Mathematics</button>
-    <button onclick="location.href='attendance.html?sub=Personal Finance'">Personal Finance</button>
-    <button onclick="location.href='attendance.html?sub=Computer Graphics'">Computer Graphics</button>
+    <div class="grid" id="subjects">
+      <!-- buttons inserted by JS -->
+    </div>
+
+    <div class="report">
+      <a href="report.html">View Full Attendance Report</a>
+    </div>
   </div>
 
-  <button class="report-btn" onclick="location.href='report.html'">View Full Attendance Report</button>
+  <!-- Modal -->
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h2 id="modalTitle">Teacher Login</h2>
+      <p id="modalSubtext">Enter teacher name and password to open attendance for <strong id="modalSubject"></strong></p>
 
+      <div class="field">
+        <label style="font-size:13px;color:#12324b">Teacher Name</label>
+        <input id="teacherName" type="text" placeholder="Full name (e.g. Yughandra More)" />
+      </div>
+
+      <div class="field">
+        <label style="font-size:13px;color:#12324b">Password</label>
+        <input id="teacherPass" type="password" placeholder="Password" />
+      </div>
+
+      <div class="error" id="modalError">Invalid name or password.</div>
+
+      <div class="modal-actions">
+        <button class="btn btn-cancel" id="cancelBtn">Cancel</button>
+        <button class="btn btn-submit" id="submitBtn">Open Attendance</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /***************
+     Subject -> Teacher mapping and passwords
+     These are intentionally client-side for your local dev use.
+     Replace with server-side auth in production.
+    ***************/
+    const SUBJECTS = [
+      "Computer Network",
+      "Principle of Software Engineer",
+      "Data Structure Algorithm",
+      "Statics Mathematics",
+      "Personal Finance",
+      "Computer Graphics"
+    ];
+
+    const CREDENTIALS = {
+      "Computer Network": { teacher: "Yughandra More", pass: "CN-YM@4521" },
+      "Principle of Software Engineer": { teacher: "Archana Bhide", pass: "PSE-AB#8832" },
+      "Data Structure Algorithm": { teacher: "Aditi Mam", pass: "DSA-AM*7290" },
+      "Statics Mathematics": { teacher: "Punam Sindhu", pass: "STAT-PS$6614" },
+      "Personal Finance": { teacher: "Mandar Sir", pass: "PF-MS@3107" },
+      "Computer Graphics": { teacher: "Yughandra More", pass: "CG-YM%5579" }
+    };
+
+    // render subject buttons
+    const subjectsWrap = document.getElementById('subjects');
+    SUBJECTS.forEach(sub => {
+      const btn = document.createElement('button');
+      btn.className = 'sub-btn';
+      btn.innerText = sub;
+      btn.addEventListener('click', () => openLogin(sub));
+      subjectsWrap.appendChild(btn);
+    });
+
+    // modal elements
+    const backdrop = document.getElementById('modalBackdrop');
+    const modalSubject = document.getElementById('modalSubject');
+    const teacherNameInput = document.getElementById('teacherName');
+    const teacherPassInput = document.getElementById('teacherPass');
+    const modalError = document.getElementById('modalError');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const submitBtn = document.getElementById('submitBtn');
+
+    let currentSubject = null;
+
+    function openLogin(subject){
+      currentSubject = subject;
+      modalSubject.textContent = subject;
+      teacherNameInput.value = '';
+      teacherPassInput.value = '';
+      modalError.style.display = 'none';
+      backdrop.style.display = 'flex';
+      teacherNameInput.focus();
+    }
+
+    function closeLogin(){
+      backdrop.style.display = 'none';
+      currentSubject = null;
+    }
+
+    cancelBtn.addEventListener('click', closeLogin);
+    backdrop.addEventListener('click', function(e){
+      if(e.target === backdrop) closeLogin();
+    });
+
+    // Trim helper and normalize name for matching
+    function normalize(s){ return (s||'').trim().replace(/\s+/g,' ').toLowerCase(); }
+
+    submitBtn.addEventListener('click', function(){
+      const enteredName = teacherNameInput.value;
+      const enteredPass = teacherPassInput.value;
+
+      if(!currentSubject){ modalError.textContent = 'No subject selected.'; modalError.style.display='block'; return; }
+
+      const cred = CREDENTIALS[currentSubject];
+      if(!cred){ modalError.textContent = 'Credentials not found for subject.'; modalError.style.display='block'; return; }
+
+      if(normalize(enteredName) === normalize(cred.teacher) && enteredPass === cred.pass){
+        // success -> redirect to attendance page and pass subject + teacher
+        const url = new URL(window.location.href);
+        const base = url.origin + url.pathname.replace(/index\.html$/,'') + 'attendance.html';
+        const params = new URLSearchParams();
+        params.set('sub', currentSubject);
+        params.set('teacher', cred.teacher);
+        // redirect
+        window.location.href = base + '?' + params.toString();
+      } else {
+        modalError.textContent = 'Invalid name or password.';
+        modalError.style.display = 'block';
+      }
+    });
+
+    // allow Enter key
+    [teacherNameInput, teacherPassInput].forEach(el=>{
+      el.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter') submitBtn.click();
+      });
+    });
+
+    // Accessibility: escape closes
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape' && backdrop.style.display === 'flex') closeLogin();
+    });
+  </script>
 </body>
 </html>
