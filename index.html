@@ -79,7 +79,7 @@
       font-weight:700;
     }
 
-    /* Modal (glass popup) */
+    /* Modal */
     .modal-backdrop{
       position:fixed;
       inset:0;
@@ -127,10 +127,6 @@
 
     .error{ color:#9b1c1c; font-size:13px; margin-top:6px; display:none; }
 
-    /* small screens */
-    @media (max-width:640px){
-      .grid{ grid-template-columns:repeat(2,1fr); }
-    }
   </style>
 </head>
 <body>
@@ -138,9 +134,7 @@
   <div class="wrap">
     <h1>RJ College of Commerce and Science — Select Subject</h1>
 
-    <div class="grid" id="subjects">
-      <!-- buttons inserted by JS -->
-    </div>
+    <div class="grid" id="subjects"></div>
 
     <div class="report">
       <a href="report.html">View Full Attendance Report</a>
@@ -148,19 +142,19 @@
   </div>
 
   <!-- Modal -->
-  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <h2 id="modalTitle">Teacher Login</h2>
-      <p id="modalSubtext">Enter teacher name and password to open attendance for <strong id="modalSubject"></strong></p>
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <h2>Teacher Login</h2>
+      <p>Enter credentials for <strong id="modalSubject"></strong></p>
 
       <div class="field">
-        <label style="font-size:13px;color:#12324b">Teacher Name</label>
-        <input id="teacherName" type="text" placeholder="Full name (e.g. Yughandra More)" />
+        <label>Teacher Name</label>
+        <input id="teacherName" type="text" />
       </div>
 
       <div class="field">
-        <label style="font-size:13px;color:#12324b">Password</label>
-        <input id="teacherPass" type="password" placeholder="Password" />
+        <label>Password</label>
+        <input id="teacherPass" type="password" />
       </div>
 
       <div class="error" id="modalError">Invalid name or password.</div>
@@ -173,11 +167,6 @@
   </div>
 
   <script>
-    /***************
-     Subject -> Teacher mapping and passwords
-     These are intentionally client-side for your local dev use.
-     Replace with server-side auth in production.
-    ***************/
     const SUBJECTS = [
       "Computer Network",
       "Principle of Software Engineer",
@@ -196,24 +185,20 @@
       "Computer Graphics": { teacher: "Yughandra More", pass: "CG-YM%5579" }
     };
 
-    // render subject buttons
     const subjectsWrap = document.getElementById('subjects');
     SUBJECTS.forEach(sub => {
       const btn = document.createElement('button');
       btn.className = 'sub-btn';
       btn.innerText = sub;
-      btn.addEventListener('click', () => openLogin(sub));
+      btn.onclick = () => openLogin(sub);
       subjectsWrap.appendChild(btn);
     });
 
-    // modal elements
     const backdrop = document.getElementById('modalBackdrop');
     const modalSubject = document.getElementById('modalSubject');
     const teacherNameInput = document.getElementById('teacherName');
     const teacherPassInput = document.getElementById('teacherPass');
     const modalError = document.getElementById('modalError');
-    const cancelBtn = document.getElementById('cancelBtn');
-    const submitBtn = document.getElementById('submitBtn');
 
     let currentSubject = null;
 
@@ -224,57 +209,30 @@
       teacherPassInput.value = '';
       modalError.style.display = 'none';
       backdrop.style.display = 'flex';
-      teacherNameInput.focus();
     }
 
     function closeLogin(){
       backdrop.style.display = 'none';
-      currentSubject = null;
     }
 
-    cancelBtn.addEventListener('click', closeLogin);
-    backdrop.addEventListener('click', function(e){
-      if(e.target === backdrop) closeLogin();
-    });
+    document.getElementById('cancelBtn').onclick = closeLogin;
 
-    // Trim helper and normalize name for matching
-    function normalize(s){ return (s||'').trim().replace(/\s+/g,' ').toLowerCase(); }
+    function normalize(s){ return (s||'').trim().toLowerCase(); }
 
-    submitBtn.addEventListener('click', function(){
+    document.getElementById('submitBtn').onclick = function(){
       const enteredName = teacherNameInput.value;
       const enteredPass = teacherPassInput.value;
 
-      if(!currentSubject){ modalError.textContent = 'No subject selected.'; modalError.style.display='block'; return; }
-
       const cred = CREDENTIALS[currentSubject];
-      if(!cred){ modalError.textContent = 'Credentials not found for subject.'; modalError.style.display='block'; return; }
 
-      if(normalize(enteredName) === normalize(cred.teacher) && enteredPass === cred.pass){
-        // success -> redirect to attendance page and pass subject + teacher
-        const url = new URL(window.location.href);
-        const base = url.origin + url.pathname.replace(/index\.html$/,'') + 'attendance.html';
-        const params = new URLSearchParams();
-        params.set('sub', currentSubject);
-        params.set('teacher', cred.teacher);
-        // redirect
-        window.location.href = base + '?' + params.toString();
+      if (normalize(enteredName) === normalize(cred.teacher) && enteredPass === cred.pass) {
+        window.location.href =
+          "attendance.html?sub=" + encodeURIComponent(currentSubject) +
+          "&teacher=" + encodeURIComponent(cred.teacher);
       } else {
-        modalError.textContent = 'Invalid name or password.';
-        modalError.style.display = 'block';
+        modalError.style.display = "block";
       }
-    });
-
-    // allow Enter key
-    [teacherNameInput, teacherPassInput].forEach(el=>{
-      el.addEventListener('keydown', (e)=>{
-        if(e.key === 'Enter') submitBtn.click();
-      });
-    });
-
-    // Accessibility: escape closes
-    document.addEventListener('keydown', (e)=>{
-      if(e.key === 'Escape' && backdrop.style.display === 'flex') closeLogin();
-    });
+    };
   </script>
 </body>
 </html>
