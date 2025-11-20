@@ -1,146 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Student Attendance Report</title>
+<script>
+  function loadStudentReport() {
+    const roll = document.getElementById("rollInput").value.trim();
 
-  <style>
-    body {
-      font-family: Poppins, sans-serif;
-      background: #eef3ff;
-      padding: 25px;
+    const table = document.getElementById("studentTable");
+    const tbody = table.querySelector("tbody");
+    const noData = document.getElementById("noData");
+
+    tbody.innerHTML = "";
+    table.style.display = "none";
+    noData.style.display = "none";
+
+    if (!roll) {
+      alert("Please enter roll number.");
+      return;
     }
 
-    h1 { text-align: center; }
+    let allRecords = [];
 
-    select, input {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border-radius: 8px;
-      border: 1px solid #bbb;
-    }
+    // Read all attendance::* keys
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
 
-    button {
-      width: 100%;
-      padding: 12px;
-      background: #1976d2;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      margin-top: 10px;
-    }
-    button:hover { background: #0d47a1; }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 25px;
-      display: none;
-    }
-
-    th, td {
-      border: 1px solid #999;
-      padding: 10px;
-      text-align: center;
-    }
-
-    th {
-      background: #1976d2;
-      color: white;
-    }
-
-    .no-data {
-      text-align: center;
-      margin-top: 20px;
-      color: red;
-      font-weight: 600;
-    }
-  </style>
-
-</head>
-
-<body>
-
-  <h1>Student Attendance Report</h1>
-
-  <label>Enter Roll Number</label>
-  <input type="text" id="rollInput" placeholder="Enter roll number">
-
-  <button onclick="loadStudentReport()">Show Report</button>
-
-  <p id="noData" class="no-data" style="display:none;">No records found for this student.</p>
-
-  <table id="studentTable">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Roll</th>
-        <th>Subject</th>
-        <th>Date</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <script>
-    function loadStudentReport() {
-      const roll = document.getElementById("rollInput").value.trim();
-
-      const table = document.getElementById("studentTable");
-      const tbody = table.querySelector("tbody");
-      const noData = document.getElementById("noData");
-
-      tbody.innerHTML = "";
-      table.style.display = "none";
-      noData.style.display = "none";
-
-      if (!roll) {
-        alert("Please enter roll number.");
-        return;
+      if (key.startsWith("attendance::")) {
+        const data = JSON.parse(localStorage.getItem(key)) || [];
+        allRecords = allRecords.concat(data);
       }
-
-      let allRecords = [];
-
-      // Read all attendance keys stored in localStorage
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-
-        // Your attendance.html stores data as "attendance::<subject>"
-        if (key.startsWith("attendance::")) {
-          const data = JSON.parse(localStorage.getItem(key)) || [];
-          allRecords = allRecords.concat(data);
-        }
-      }
-
-      // Filter by roll number
-      const studentRecords = allRecords.filter(r => r.roll == roll);
-
-      if (studentRecords.length === 0) {
-        noData.style.display = "block";
-        return;
-      }
-
-      studentRecords.forEach(r => {
-        let row = `
-          <tr>
-            <td>${r.name}</td>
-            <td>${r.roll}</td>
-            <td>${r.subject}</td>
-            <td>${r.date}</td>
-            <td>${r.status}</td>
-          </tr>
-        `;
-        tbody.innerHTML += row;
-      });
-
-      table.style.display = "table";
     }
-  </script>
 
-</body>
-</html>
+    const studentRecords = allRecords.filter(r => r.roll == roll);
+
+    if (studentRecords.length === 0) {
+      noData.style.display = "block";
+      return;
+    }
+
+    studentRecords.forEach(r => {
+      let row = `
+        <tr>
+          <td>${r.name}</td>
+          <td>${r.roll}</td>
+          <td>${r.subject}</td>
+          <td>${r.date}</td>
+          <td>${r.status}</td>
+        </tr>
+      `;
+      tbody.innerHTML += row;
+    });
+
+    table.style.display = "table";
+  }
+</script>
