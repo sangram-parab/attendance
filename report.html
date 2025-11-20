@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Student Attendance Record</title>
+  <title>Student Attendance Report</title>
 
   <style>
     body {
@@ -11,7 +11,8 @@
       background: #eef3ff;
       padding: 25px;
     }
-    h1 { text-align: center; margin-bottom: 20px; }
+
+    h1 { text-align: center; }
 
     select, input {
       width: 100%;
@@ -64,23 +65,12 @@
 
 <body>
 
-  <h1>Student Attendance Record</h1>
-
-  <label>Select Subject</label>
-  <select id="subjectSelect">
-    <option value="">-- Select --</option>
-    <option>Computer Network</option>
-    <option>Principle of Software Engineer</option>
-    <option>Data Structure Algorithm</option>
-    <option>Statics Mathematics</option>
-    <option>Personal Finance</option>
-    <option>Computer Graphics</option>
-  </select>
+  <h1>Student Attendance Report</h1>
 
   <label>Enter Roll Number</label>
   <input type="text" id="rollInput" placeholder="Enter roll number">
 
-  <button onclick="loadStudentRecord()">Show Student Record</button>
+  <button onclick="loadStudentReport()">Show Report</button>
 
   <p id="noData" class="no-data" style="display:none;">No records found for this student.</p>
 
@@ -89,6 +79,7 @@
       <tr>
         <th>Name</th>
         <th>Roll</th>
+        <th>Subject</th>
         <th>Date</th>
         <th>Status</th>
       </tr>
@@ -97,8 +88,7 @@
   </table>
 
   <script>
-    function loadStudentRecord() {
-      const subject = document.getElementById("subjectSelect").value;
+    function loadStudentReport() {
       const roll = document.getElementById("rollInput").value.trim();
 
       const table = document.getElementById("studentTable");
@@ -109,29 +99,26 @@
       table.style.display = "none";
       noData.style.display = "none";
 
-      if (!subject || !roll) {
-        alert("Please select subject and enter roll number.");
+      if (!roll) {
+        alert("Please enter roll number.");
         return;
       }
 
       let allRecords = [];
 
-      // read all keys that attendance.html saved
+      // Read all attendance keys stored in localStorage
       for (let i = 0; i < localStorage.length; i++) {
-        let key = localStorage.key(i);
+        const key = localStorage.key(i);
 
+        // Your attendance.html stores data as "attendance::<subject>"
         if (key.startsWith("attendance::")) {
-          let data = JSON.parse(localStorage.getItem(key)) || [];
-
-          // Merge all data
+          const data = JSON.parse(localStorage.getItem(key)) || [];
           allRecords = allRecords.concat(data);
         }
       }
 
-      // filter by subject and roll
-      const studentRecords = allRecords.filter(r =>
-        r.subject === subject && r.roll == roll
-      );
+      // Filter by roll number
+      const studentRecords = allRecords.filter(r => r.roll == roll);
 
       if (studentRecords.length === 0) {
         noData.style.display = "block";
@@ -143,6 +130,7 @@
           <tr>
             <td>${r.name}</td>
             <td>${r.roll}</td>
+            <td>${r.subject}</td>
             <td>${r.date}</td>
             <td>${r.status}</td>
           </tr>
