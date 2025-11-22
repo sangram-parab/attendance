@@ -5,23 +5,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Attendance — Subject</title>
   <style>
-    body{ font-family:Poppins, Inter, sans-serif; margin:0; padding:28px; background:#f6fbff; color:#07304f; }
+    body{ font-family:Poppins,Inter,sans-serif; margin:0; padding:28px; background:#f6fbff; color:#07304f; }
     .card{ max-width:900px; margin:18px auto; background:white; padding:18px; border-radius:12px; box-shadow:0 8px 30px rgba(8,24,50,0.06); }
     h1{ margin:0 0 6px 0; font-size:20px; }
     .meta{ color:#234a6f; font-size:14px; margin-bottom:12px; }
-    .hint{ color:#234a6f; font-size:13px; margin-bottom:10px; opacity:0.9; }
-
     table{ width:100%; border-collapse:collapse; margin-top:12px; }
     th,td{ padding:10px; border-bottom:1px solid rgba(10,30,60,0.06); text-align:left; }
-    .actions{ display:flex; gap:8px; margin-top:10px; }
-    .btn{ padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:700; }
-    .btn-save{ background:#2e7d32; color:white; }
-    .btn-clear{ background:#c62828; color:white; }
-
-    .empty{ color:#6b879f; font-size:14px; padding:18px 0; }
-
-    .row{ display:flex; gap:8px; margin-top:10px; }
-    input[type="text"]{ padding:8px 10px; border-radius:8px; border:1px solid rgba(10,30,60,0.06); flex:1; }
+    .btn{ padding:10px 18px; border-radius:8px; border:none; cursor:pointer; font-weight:700; background:#2e7d32; color:#fff; margin-top:18px; display:block; margin-left:auto; margin-right:auto; }
   </style>
 </head>
 <body>
@@ -29,26 +19,23 @@
   <div class="card">
     <h1 id="title">Attendance</h1>
     <div class="meta" id="meta">Subject: — &nbsp; | &nbsp; Teacher: —</div>
-    <div class="hint">Add students, mark present/absent, and save to localStorage.</div>
 
-    <div class="row">
-      <input id="rollInput" placeholder="Enter student roll no (e.g. 21/001)" />
-      <input id="nameInput" placeholder="Student name" />
-      <button class="btn btn-save" id="addBtn">Add Student</button>
-    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Roll</th>
+          <th>Name</th>
+          <th>Present</th>
+          <th>Absent</th>
+        </tr>
+      </thead>
+      <tbody id="studentList"></tbody>
+    </table>
 
-    <div id="listWrap">
-      <div class="empty">No students added. Add a student to start marking attendance.</div>
-    </div>
-
-    <div class="actions">
-      <button class="btn btn-save" id="saveLocal">Save to localStorage</button>
-      <button class="btn btn-clear" id="clearAll">Clear All</button>
-    </div>
+    <button class="btn" id="submitAttendance">Submit Attendance</button>
   </div>
 
   <script>
-    // Parse subject + teacher from URL
     const params = new URLSearchParams(window.location.search);
     const subject = params.get('sub') || 'Unknown Subject';
     const teacher = params.get('teacher') || 'Unknown Teacher';
@@ -56,88 +43,50 @@
     document.getElementById('title').innerText = `${subject} — Attendance`;
     document.getElementById('meta').innerText = `Subject: ${subject}  |  Teacher: ${teacher}`;
 
-    const listWrap = document.getElementById('listWrap');
-    const rollInput = document.getElementById('rollInput');
-    const nameInput = document.getElementById('nameInput');
-    const addBtn = document.getElementById('addBtn');
+    const students = [
+      { roll:6202, name:"Sangram" },
+      { roll:6203, name:"Nitesh" },
+      { roll:6204, name:"Anurang" },
+      { roll:6205, name:"Neeraj" },
+      { roll:6206, name:"Suraj" },
+      { roll:6207, name:"Yash" },
+      { roll:6208, name:"Omkar" },
+      { roll:6209, name:"Sujal" },
+      { roll:6210, name:"Raj" },
+      { roll:6211, name:"Pranjal" },
+      { roll:6212, name:"Vibhor" },
+      { roll:6213, name:"Gautam" },
+      { roll:6214, name:"Mrunal" }
+    ];
 
-    let students = []; // Complete records here
+    const tbody = document.getElementById("studentList");
 
-    function renderList(){
-      if(students.length === 0){
-        listWrap.innerHTML = '<div class="empty">No students added.</div>';
-        return;
-      }
-      let html = '<table><thead><tr><th>Roll</th><th>Name</th><th>Status</th><th>Action</th></tr></thead><tbody>';
-      students.forEach((s, idx)=>{
-        html += `
-          <tr>
-            <td>${s.roll}</td>
-            <td>${s.name}</td>
-            <td>${s.status}</td>
-            <td>
-              <button onclick="toggle(${idx})">Toggle</button>
-              <button onclick="remove(${idx})" style="margin-left:8px;color:#c62828">Remove</button>
-            </td>
-          </tr>`;
-      });
-      html += '</tbody></table>';
-      listWrap.innerHTML = html;
-    }
-
-    addBtn.addEventListener('click', ()=>{
-      const roll = rollInput.value.trim();
-      const name = nameInput.value.trim();
-      if(!roll || !name) return alert('Enter roll and name');
-
-      const today = new Date().toLocaleDateString('en-IN');
-
-      students.push({
-        roll,
-        name,
-        subject,
-        teacher,
-        date: today,
-        status: "Present"
-      });
-
-      rollInput.value = '';
-      nameInput.value = '';
-      renderList();
+    students.forEach(s => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${s.roll}</td>
+        <td>${s.name}</td>
+        <td><input type="radio" name="att_${s.roll}" value="Present"></td>
+        <td><input type="radio" name="att_${s.roll}" value="Absent"></td>
+      `;
+      tbody.appendChild(row);
     });
 
-    window.toggle = function(idx){
-      students[idx].status = (students[idx].status === "Present") ? "Absent" : "Present";
-      renderList();
-    }
+    document.getElementById("submitAttendance").onclick = () => {
+      const today = new Date().toLocaleDateString('en-IN');
+      const key = `attendance::${subject}::${today}`;
+      const records = [];
 
-    window.remove = function(idx){
-      students.splice(idx,1);
-      renderList();
-    }
+      students.forEach(s => {
+        const selected = document.querySelector(`input[name=att_${s.roll}]:checked`);
+        if(selected){
+          records.push({ roll:s.roll, name:s.name, subject, teacher, date:today, status:selected.value });
+        }
+      });
 
-    const storageKey = `attendance::${subject}::${teacher}`;
-
-    document.getElementById('saveLocal').onclick = ()=>{
-      localStorage.setItem(storageKey, JSON.stringify(students));
-      alert('Saved to localStorage.');
+      localStorage.setItem(key, JSON.stringify(records));
+      alert("Attendance saved.");
     };
-
-    document.getElementById('clearAll').onclick = ()=>{
-      if(!confirm('Clear all?')) return;
-      students = [];
-      localStorage.removeItem(storageKey);
-      renderList();
-    };
-
-    // Load saved data
-    (function(){
-      const raw = localStorage.getItem(storageKey);
-      if(raw){
-        students = JSON.parse(raw) || [];
-      }
-      renderList();
-    })();
   </script>
 </body>
 </html>
