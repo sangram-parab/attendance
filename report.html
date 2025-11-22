@@ -8,23 +8,29 @@
   <style>
     body { font-family:Poppins,sans-serif; background:#eef3ff; padding:25px; }
     h1 { text-align:center; }
+    
     input, select {
       width:100%; padding:12px; margin:10px 0;
       border-radius:8px; border:1px solid #bbb;
     }
+
     button {
       width:100%; padding:12px; background:#1976d2;
       color:white; border:none; border-radius:8px;
       cursor:pointer; font-size:16px; margin-top:10px;
     }
+
     table {
       width:100%; border-collapse:collapse;
       margin-top:25px; display:none;
     }
+
     th, td {
       border:1px solid #999; padding:10px; text-align:center;
     }
+
     th { background:#1976d2; color:white; }
+
     .no-data {
       text-align:center; margin-top:20px; color:red; font-weight:600;
     }
@@ -38,20 +44,12 @@
   <label>Select Subject</label>
   <select id="subSelect">
     <option value="">Select subject</option>
-
-    <!-- Added full subject list -->
     <option>Computer Network</option>
     <option>Principle of Software Engineer</option>
     <option>Data Structure Algorithm</option>
     <option>Statics Mathematics</option>
     <option>Personal Finance</option>
     <option>Computer Graphics</option>
-    <option>Cloud Computing</option>
-    <option>Python Programming</option>
-    <option>Operating System</option>
-    <option>Environmental Studies</option>
-    <option>Web Designing</option>
-
   </select>
 
   <label>Select Date</label>
@@ -97,10 +95,15 @@
         return;
       }
 
-      const key = `attendance::${subject}::${new Date(date).toLocaleDateString('en-IN')}`;
-      const data = JSON.parse(localStorage.getItem(key)) || [];
+      // Convert date to IN format (DD/MM/YYYY)
+      const formattedDate = new Date(date).toLocaleDateString('en-IN');
 
-      const filtered = data.filter(r => r.roll == roll);
+      // LocalStorage key format
+      const key = `attendance::${subject}::${formattedDate}`;
+
+      const storedData = JSON.parse(localStorage.getItem(key)) || [];
+
+      const filtered = storedData.filter(r => r.roll == roll);
 
       if (filtered.length === 0) {
         noData.style.display = "block";
