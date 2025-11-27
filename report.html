@@ -6,125 +6,168 @@
   <title>Student Attendance Report</title>
 
   <style>
-    body { font-family:Poppins,sans-serif; background:#eef3ff; padding:25px; }
-    h1 { text-align:center; }
-    
+    body { font-family: Poppins, sans-serif; background: #eef3ff; padding: 25px; }
+    h1 { text-align: center; margin-bottom: 18px; }
+    label { display:block; margin-top: 12px; font-weight:600; }
     input, select {
-      width:100%; padding:12px; margin:10px 0;
-      border-radius:8px; border:1px solid #bbb;
+      width:100%; padding:12px; margin:8px 0;
+      border-radius:8px; border:1px solid #bbb; box-sizing:border-box;
+      background:white;
     }
-
     button {
       width:100%; padding:12px; background:#1976d2;
       color:white; border:none; border-radius:8px;
       cursor:pointer; font-size:16px; margin-top:10px;
     }
-
     table {
       width:100%; border-collapse:collapse;
       margin-top:25px; display:none;
     }
-
     th, td {
       border:1px solid #999; padding:10px; text-align:center;
     }
-
     th { background:#1976d2; color:white; }
-
-    .no-data {
-      text-align:center; margin-top:20px; color:red; font-weight:600;
-    }
+    .no-data { text-align:center; margin-top:20px; color:#b92b2b; font-weight:600; display:none; }
+    .note { font-size:13px; color:#333; margin-top:6px; }
+    .container { max-width:980px; margin:0 auto; background: #f7fbff; padding:20px; border-radius:10px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
   </style>
 </head>
 
 <body>
+  <div class="container">
+    <h1>Student Attendance Report</h1>
 
-  <h1>Student Attendance Report</h1>
+    <label>Select Subject</label>
+    <select id="subSelect">
+      <option value="">Select subject</option>
+      <option>Computer Network</option>
+      <option>Principle of Software Engineer</option>
+      <option>Data Structure Algorithm</option>
+      <option>Statics Mathematics</option>
+      <option>Personal Finance</option>
+      <option>Computer Graphics</option>
+    </select>
 
-  <label>Select Subject</label>
-  <select id="subSelect">
-    <option value="">Select subject</option>
-    <option>Computer Network</option>
-    <option>Principle of Software Engineer</option>
-    <option>Data Structure Algorithm</option>
-    <option>Statics Mathematics</option>
-    <option>Personal Finance</option>
-    <option>Computer Graphics</option>
-  </select>
+    <!-- date removed intentionally -->
+    <p class="note">Note: Date field removed — clicking "Show Report" will display all stored dates for the selected subject and roll number.</p>
 
-  <label>Select Date</label>
-  <input type="date" id="dateInput" />
+    <label>Enter Roll Number</label>
+    <input type="text" id="rollInput" placeholder="Enter roll number" />
 
-  <label>Enter Roll Number</label>
-  <input type="text" id="rollInput" placeholder="Enter roll number" />
+    <button onclick="loadStudentReport()">Show Report</button>
 
-  <button onclick="loadStudentReport()">Show Report</button>
+    <p id="noData" class="no-data">No records found.</p>
 
-  <p id="noData" class="no-data" style="display:none;">No records found.</p>
-
-  <table id="studentTable">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Roll</th>
-        <th>Subject</th>
-        <th>Teacher</th>
-        <th>Date</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+    <table id="studentTable" aria-live="polite">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Roll</th>
+          <th>Subject</th>
+          <th>Teacher</th>
+          <th>Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
   <script>
     function loadStudentReport() {
-      const subject = document.getElementById("subSelect").value;
-      const date = document.getElementById("dateInput").value;
+      const subject = document.getElementById("subSelect").value.trim();
       const roll = document.getElementById("rollInput").value.trim();
 
       const table = document.getElementById("studentTable");
       const tbody = table.querySelector("tbody");
       const noData = document.getElementById("noData");
 
+      // reset UI
       tbody.innerHTML = "";
       table.style.display = "none";
       noData.style.display = "none";
 
-      if (!subject || !date || !roll) {
-        alert("Please select subject, date and roll number.");
+      if (!subject) {
+        alert("Please select a subject.");
+        return;
+      }
+      if (!roll) {
+        alert("Please enter roll number.");
         return;
       }
 
-      // Convert date to IN format (DD/MM/YYYY)
-      const formattedDate = new Date(date).toLocaleDateString('en-IN');
+      let allRecords = [];
 
-      // LocalStorage key format
-      const key = `attendance::${subject}::${formattedDate}`;
+      // iterate through localStorage and collect keys that match the pattern:
+      // attendance::<subject>::<date>
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
 
-      const storedData = JSON.parse(localStorage.getItem(key)) || [];
+        // match exact subject prefix (case-sensitive). If your stored subject differs in spacing/case, adjust here.
+        const prefix = `attendance::${subject}::`;
 
-      const filtered = storedData.filter(r => r.roll == roll);
+        if (typeof key === 'string' && key.startsWith(prefix)) {
+          try {
+            const stored = JSON.parse(localStorage.getItem(key)) || [];
 
-      if (filtered.length === 0) {
+            // stored expected to be array of records; filter by roll
+            const matches = stored.filter(r => String(r.roll).trim() === roll);
+            if (matches.length > 0) {
+              // keep record as-is (date typically inside r.date) or attach key date if needed
+              allRecords = allRecords.concat(matches);
+            }
+          } catch (e) {
+            // ignore malformed JSON entries
+            console.warn("Skipping malformed localStorage item for key:", key);
+          }
+        }
+      }
+
+      if (allRecords.length === 0) {
         noData.style.display = "block";
         return;
       }
 
-      filtered.forEach(r => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${r.name}</td>
-            <td>${r.roll}</td>
-            <td>${r.subject}</td>
-            <td>${r.teacher}</td>
-            <td>${r.date}</td>
-            <td>${r.status}</td>
-          </tr>`;
+      // sort records by date if r.date exists and is parseable (optional)
+      allRecords.sort((a, b) => {
+        const da = a.date ? Date.parse(a.date) : 0;
+        const db = b.date ? Date.parse(b.date) : 0;
+        return (isNaN(da) ? 0 : da) - (isNaN(db) ? 0 : db);
       });
 
+      // render rows
+      const rowsHtml = allRecords.map(r => {
+        // fallback values for missing properties
+        const name = r.name || "";
+        const rroll = r.roll || "";
+        const subj = r.subject || subject;
+        const teacher = r.teacher || "";
+        const date = r.date || "";
+        const status = r.status || "";
+        return `
+          <tr>
+            <td>${escapeHtml(name)}</td>
+            <td>${escapeHtml(rroll)}</td>
+            <td>${escapeHtml(subj)}</td>
+            <td>${escapeHtml(teacher)}</td>
+            <td>${escapeHtml(date)}</td>
+            <td>${escapeHtml(status)}</td>
+          </tr>`;
+      }).join("");
+
+      tbody.innerHTML = rowsHtml;
       table.style.display = "table";
     }
-  </script>
 
+    // small helper to avoid injecting HTML if localStorage contains HTML-like strings
+    function escapeHtml(str) {
+      if (typeof str !== 'string') return str;
+      return str.replace(/[&<>"'`=\/]/g, function(s) {
+        return ({
+          '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;', '`':'&#96;','=':'&#61;','/':'&#47;'
+        })[s];
+      });
+    }
+  </script>
 </body>
 </html>
