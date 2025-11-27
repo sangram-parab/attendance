@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Defaulter List</title>
+
+<style>
+  body { font-family:Poppins, sans-serif; background:#eef3ff; padding:20px; }
+  .box { max-width:480px; margin:0 auto; background:white; padding:20px; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+  h2 { text-align:center; }
+  input, select { width:100%; padding:12px; margin:10px 0; border-radius:8px; border:1px solid #bbb; }
+  button { width:100%; padding:12px; background:#1976d2; color:white; border:none; border-radius:8px; cursor:pointer; }
+  table { width:100%; border-collapse:collapse; margin-top:20px; }
+  th, td { border:1px solid #999; padding:10px; text-align:center; }
+  th { background:#1976d2; color:white; }
+  .hidden { display:none; }
+</style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>Teacher Login</h2>
+
+  <label>Select Subject</label>
+  <select id="subjectSelect">
+    <option value="">Select Subject</option>
+    <option value="Computer Network">Computer Network</option>
+    <option value="Principle of Software Engineer">Principle of Software Engineer</option>
+    <option value="Data Structure Algorithm">Data Structure Algorithm</option>
+    <option value="Statics Mathematics">Statics Mathematics</option>
+    <option value="Personal Finance">Personal Finance</option>
+    <option value="Computer Graphics">Computer Graphics</option>
+  </select>
+
+  <label>Enter Password</label>
+  <input type="password" id="passwordInput">
+
+  <button onclick="teacherLogin()">Login</button>
+</div>
+
+<div id="defaulterSection" class="hidden">
+  <h2>Defaulter List</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Roll</th>
+        <th>Total Lectures</th>
+        <th>Present</th>
+        <th>Absent</th>
+        <th>Reason</th>
+      </tr>
+    </thead>
+    <tbody id="defaulterTable"></tbody>
+  </table>
+</div>
+
+
+<script>
+const passwords = {
+  "Computer Network": "CN-YM@4521",
+  "Principle of Software Engineer": "PSE-AB#8832",
+  "Data Structure Algorithm": "DSA-AM*7290",
+  "Statics Mathematics": "STAT-PS$6614",
+  "Personal Finance": "PF-MS@3107",
+  "Computer Graphics": "CG-YM%5579"
+};
+
+function teacherLogin() {
+  const subject = document.getElementById("subjectSelect").value;
+  const password = document.getElementById("passwordInput").value;
+
+  if (!subject || !password) {
+    alert("Enter subject and password");
+    return;
+  }
+
+  if (passwords[subject] !== password) {
+    alert("Wrong password");
+    return;
+  }
+
+  document.querySelector(".box").style.display = "none";
+  document.getElementById("defaulterSection").classList.remove("hidden");
+
+  loadDefaulters(subject);
+}
+
+function loadDefaulters(subject) {
+  let attendanceRecords = [];
+
+  // read all the attendance keys for this subject
+  for (let i = 0; i < localStorage.length; i++) {
+    let key = localStorage.key(i);
+
+    if (key.startsWith(`attendance::${subject}::`)) {
+      let data = JSON.parse(localStorage.getItem(key)) || [];
+      attendanceRecords = attendanceRecords.concat(data);
+    }
+  }
+
+  // group data by roll number
+  let studentMap = {};
+
+  attendanceRecords.forEach(rec => {
+    if (!studentMap[rec.roll]) {
+      studentMap[rec.roll] = {
+        name: rec.name,
+        roll: rec.roll,
+        total: 0,
+        present: 0,
+        absent: 0,
+        streak: 0,
+        maxStreak: 0
+      };
+    }
+
+    let st = studentMap[rec.roll];
+    st.total++;
+
+    if (rec.status === "Present") {
+      st.present++;
+      st.streak = 0;     // reset continuous absent streak
+    } else {
+      st.absent++;
+      st.streak++;
+      st.maxStreak = Math.max(st.maxStreak, st.streak);
+    }
+  });
+
+  let table = "";
+
+  for (let roll in studentMap) {
+    const s = studentMap[roll];
+
+    const fiftyPercentRule = s.absent >= s.total / 2;
+    const continuousRule = s.maxStreak >= 5;
+
+    if (fiftyPercentRule || continuousRule) {
+      let reason = [];
+
+      if (fiftyPercentRule) reason.push("50% Absence Rule");
+      if (continuousRule) reason.push("5 Continuous Absence");
+
+      table += `
+        <tr>
+          <td>${s.name}</td>
+          <td>${s.roll}</td>
+          <td>${s.total}</td>
+          <td>${s.present}</td>
+          <td>${s.absent}</td>
+          <td>${reason.join(" & ")}</td>
+        </tr>
+      `;
+    }
+  }
+
+  document.getElementById("defaulterTable").innerHTML = table || "<tr><td colspan='6'>No defaulters</td></tr>";
+}
+</script>
+
+</body>
+</html>
