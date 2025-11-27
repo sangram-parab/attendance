@@ -5,20 +5,61 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Attendance — Subject</title>
   <style>
-    body{ font-family:Poppins,Inter,sans-serif; margin:0; padding:28px; background:#f6fbff; color:#07304f; }
-    .card{ max-width:900px; margin:18px auto; background:white; padding:18px; border-radius:12px; box-shadow:0 8px 30px rgba(8,24,50,0.06); }
-    h1{ margin:0 0 6px 0; font-size:20px; }
+    body{
+      font-family:Poppins,Inter,sans-serif;
+      margin:0; padding:28px;
+      background:#f6fbff;
+      color:#07304f;
+    }
+    .card{
+      max-width:900px;
+      margin:18px auto;
+      background:white;
+      padding:18px;
+      border-radius:12px;
+      box-shadow:0 8px 30px rgba(8,24,50,0.06);
+    }
+    h1{ margin:0; font-size:20px; }
     .meta{ color:#234a6f; font-size:14px; margin-bottom:12px; }
     table{ width:100%; border-collapse:collapse; margin-top:12px; }
     th,td{ padding:10px; border-bottom:1px solid rgba(10,30,60,0.06); text-align:left; }
-    .btn{ padding:10px 18px; border-radius:8px; border:none; cursor:pointer; font-weight:700; background:#2e7d32; color:#fff; margin-top:18px; display:block; margin-left:auto; margin-right:auto; }
+    .btn{
+      padding:10px 18px; border-radius:8px;
+      border:none; cursor:pointer; font-weight:700;
+      background:#2e7d32; color:#fff;
+      margin-top:18px; display:block; margin-left:auto; margin-right:auto;
+    }
+    /* Header buttons */
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:15px;
+    }
+    .btn-small{
+      padding:8px 14px;
+      border-radius:8px;
+      border:none;
+      cursor:pointer;
+      font-weight:600;
+      font-size:14px;
+    }
+    .back-btn{ background:#cfd8dc; }
+    .defaulter-btn{ background:#e53935; color:#fff; }
   </style>
 </head>
 <body>
 
   <div class="card">
-    <h1 id="title">Attendance</h1>
-    <div class="meta" id="meta">Subject: — &nbsp; | &nbsp; Teacher: —</div>
+
+    <!-- TOP HEADER WITH BUTTONS -->
+    <div class="topbar">
+      <button class="btn-small back-btn" onclick="history.back()">⬅ Back</button>
+      <h1 id="title">Attendance</h1>
+      <button class="btn-small defaulter-btn" onclick="openDefaulterList()">Defaulter List</button>
+    </div>
+
+    <div class="meta" id="meta">Subject: — | Teacher: —</div>
 
     <table>
       <thead>
@@ -36,6 +77,7 @@
   </div>
 
   <script>
+    // GET SUBJECT & TEACHER FROM URL
     const params = new URLSearchParams(window.location.search);
     const subject = params.get('sub') || 'Unknown Subject';
     const teacher = params.get('teacher') || 'Unknown Teacher';
@@ -43,6 +85,14 @@
     document.getElementById('title').innerText = `${subject} — Attendance`;
     document.getElementById('meta').innerText = `Subject: ${subject}  |  Teacher: ${teacher}`;
 
+    // OPEN DEFAULTER LIST PAGE
+    function openDefaulterList(){
+      window.location.href =
+        "defaulter.html?sub=" + encodeURIComponent(subject) +
+        "&teacher=" + encodeURIComponent(teacher);
+    }
+
+    // STUDENT LIST
     const students = [
       { roll:6202, name:"Sangram" },
       { roll:6203, name:"Nitesh" },
@@ -61,6 +111,7 @@
 
     const tbody = document.getElementById("studentList");
 
+    // AUTO-GENERATE ROWS
     students.forEach(s => {
       const row = document.createElement("tr");
       row.innerHTML = `
@@ -72,6 +123,7 @@
       tbody.appendChild(row);
     });
 
+    // SAVE ATTENDANCE
     document.getElementById("submitAttendance").onclick = () => {
       const today = new Date().toLocaleDateString('en-IN');
       const key = `attendance::${subject}::${today}`;
@@ -80,7 +132,12 @@
       students.forEach(s => {
         const selected = document.querySelector(`input[name=att_${s.roll}]:checked`);
         if(selected){
-          records.push({ roll:s.roll, name:s.name, subject, teacher, date:today, status:selected.value });
+          records.push({
+            roll:s.roll, name:s.name,
+            subject, teacher,
+            date:today,
+            status:selected.value
+          });
         }
       });
 
@@ -88,5 +145,6 @@
       alert("Attendance saved.");
     };
   </script>
+
 </body>
 </html>
